@@ -1,0 +1,24 @@
+extends ../node_modules/jade-bootstrap/_bootstrap
+
+append styles
+  link(rel="stylesheet",href="/stylesheets/MarkerCluster.css")
+  link(rel="stylesheet",href="/stylesheets/leaflet.css")
+  link(rel="stylesheet",href="/stylesheets/easy-button.css")
+  style.
+    #mapid {
+      width: 100%;
+      height: 500px;
+    }
+
+block body
+  .container
+    h1 Photo mapping
+    #mapid
+
+append scripts
+  script(src="/javascripts/leaflet.js")
+  script(src="/javascripts/leaflet.markercluster.js").
+  script(src="/javascripts/leaflet-button.js").
+  script(src="/javascripts/leaflet-easy-tag-filter.js").
+  script(src="/javascripts/map.js").
+
