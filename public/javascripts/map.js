@@ -1,6 +1,5 @@
 "use strict";
 
-
 // We are using a leaflet map centered on Wellington
 var mymap = L.map('mapid').setView([-41.296, 174.777], 5);
 
@@ -13,6 +12,11 @@ var markers = L.markerClusterGroup();
 
 // All of the data comes from the servers photos endpoint
 $.get("/photos",function(result) { 
-  alert("response!");
   console.log(result);
+
+  var markers = L.markerClusterGroup();
+
+  result.forEach(function(photo){
+    L.marker([photo.lat,photo.lon]).addTo(mymap);
+  });
 })
