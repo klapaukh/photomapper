@@ -23,7 +23,7 @@ exec(cmdGeotagged, function(error, stdout, stderr) {
     }
     result = result.map(function(currentValue){
         var folder = currentValue.Directory;
-        var file = currentValue.eFilePath;
+        var file = currentValue.FilePath;
         var filepath = currentValue.SourceFile;
         var lat = currentValue.GPSLatitude;
         var lon = currentValue.GPSLongitude;
@@ -42,6 +42,39 @@ exec(cmdGeotagged, function(error, stdout, stderr) {
   });
 });
 
+exec(cmdManual, function(error, stdout, stderr) {
+  if(error){
+    console.error(error)
+    return;
+  }
+  var converter = new Converter({});
+  converter.fromString(stdout,function(error, result){
+    if(error){
+      console.error(error);
+      return;
+    }
+    result = result.map(function(currentValue){
+        var folder = currentValue.Directory;
+        var file = currentValue.FilePath;
+        var filepath = currentValue.SourceFile;
+        var tags = currentValue.Tags;
+
+        var latLon = folder.split("/").pop();
+        var lat = currentValue.GPSLatitude;
+        var lon = currentValue.GPSLongitude;
+
+        //Remove public at the start of the string
+        filepath = filepath.substring(6); 
+        return {
+          filename: filepath,
+          lat: lat,
+          lon: lon,
+          tags: tags
+        };
+    });
+    photoData = photoData.concat(result);
+  });
+});
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
