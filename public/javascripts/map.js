@@ -11,12 +11,12 @@ L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 
 //Extend the Default marker class
 var MyIcon = L.Icon.Default.extend({
-   options: {
-   	    iconUrl: '/images/marker-icon.png',
-        iconRetinaUrl: '/images/marker-icon-2x.png',
-        shadowUrl: '/images/marker-shadow.png',
-        shadowRetinaUrl: '/images/marker-shadow.png'
-   }
+ options: {
+   iconUrl: '/images/marker-icon.png',
+   iconRetinaUrl: '/images/marker-icon-2x.png',
+   shadowUrl: '/images/marker-shadow.png',
+   shadowRetinaUrl: '/images/marker-shadow.png'
+ }
 });
 
 var myIcon = new MyIcon();
@@ -31,6 +31,10 @@ $.get("/photos",function(result) {
   }*/);
 
   result.forEach(function(photo){
+    if(photo.lat === '' || photo.lon === ''){
+      console.log("Missing lat/lon data in image " + photo.filename);
+      return;
+    }
     var m = L.marker([photo.lat,photo.lon],{icon: myIcon});
     
     m.bindPopup("<img src=\"" + photo.filename + "\" width=\"100px\" />");

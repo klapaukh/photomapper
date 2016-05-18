@@ -8,73 +8,61 @@ var photoData = [];
 
 var exec = require('child_process').exec;
 var cmdGeotagged = 'exiftool -csv -n -r. public/images/geotagged/';
-var cmdManual = 'exiftool -csv -n -r. public/images/manuallyPlaced/';
+var cmdManual    = 'exiftool -csv -n -r. public/images/manuallyPlaced/';
 
-exec(cmdGeotagged, function(error, stdout, stderr) {
-  if(error){
-    console.error(error)
-    return;
-  }
-  var converter = new Converter({});
-  converter.fromString(stdout,function(error, result){
-    if(error){
-      console.error(error);
-      return;
-    }
-    result = result.map(function(currentValue){
-        var folder = currentValue.Directory;
-        var file = currentValue.FilePath;
-        var filepath = currentValue.SourceFile;
-        var lat = currentValue.GPSLatitude;
-        var lon = currentValue.GPSLongitude;
-        var tags = currentValue.Tags;
+var geoTagProcess = exec(cmdGeotagged);
+var manualProcess = exec(cmdManual);
 
-        //Remove public at the start of the string
-        filepath = filepath.substring(6); 
-        return {
-          filename: filepath,
-          lat: lat,
-          lon: lon,
-          tags: tags
-        };
-    });
-    photoData = photoData.concat(result);
-  });
+var converterTag = new Converter({constructResult:false});
+var converterMan = new Converter({constructResult:false});
+
+//record_parsed will be emitted per row
+converterTag.on("record_parsed", function (row) {
+
+  var folder   = row.Directory;
+  var file     = row.FilePath;
+  var filepath = row.SourceFile;
+  var lat      = row.GPSLatitude;
+  var lon      = row.GPSLongitude;
+  var tags     = row.Tags;
+
+  //Remove public at the start of the string
+  filepath = filepath.substring(6); 
+  result = {
+    filename: filepath,
+    lat: lat,
+    lon: lon,
+    tags: tags
+  };
+  photoData = photoData.concat(result);
 });
 
-exec(cmdManual, function(error, stdout, stderr) {
-  if(error){
-    console.error(error)
-    return;
-  }
-  var converter = new Converter({});
-  converter.fromString(stdout,function(error, result){
-    if(error){
-      console.error(error);
-      return;
-    }
-    result = result.map(function(currentValue){
-        var folder = currentValue.Directory;
-        var file = currentValue.FilePath;
-        var filepath = currentValue.SourceFile;
-        var tags = currentValue.Tags;
 
-        var latLon = folder.split("/").pop().split("_");
-        var lat = latLon[0];
-        var lon = latLon[1];
+converterMan.on("record_parsed", function (row) {
+  var folder = row.Directory;
+  var file = row.FilePath;
+  var filepath = row.SourceFile;
+  var tags = row.Tags;
 
-        //Remove public at the start of the string
-        filepath = filepath.substring(6); 
-        return {
-          filename: filepath,
-          lat: lat,
-          lon: lon,
-          tags: tags
-        };
-    });
-    photoData = photoData.concat(result);
-  });
+  var latLon = folder.split("/").pop().split("_");
+  var lat = latLon[0];
+  var lon = latLon[1];
+
+  //Remove public at the start of the string
+  filepath = filepath.substring(6); 
+  result = {
+    filename: filepath,
+    lat: lat,
+    lon: lon,
+    tags: tags
+  };
+  photoData = photoData.concat(result);
 });
+
+
+geoTagProcess.stdout.pipe(converterTag);
+manualProcess.stdout.pipe(converterMan);
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
