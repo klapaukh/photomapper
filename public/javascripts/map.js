@@ -37,7 +37,11 @@ $.get("/photos",function(result) {
     }
     var m = L.marker([photo.lat,photo.lon],{icon: myIcon});
     
-    m.bindPopup("<img src=\"" + photo.filename + "\" width=\"100px\" />");
+    m.bindPopup("<a href=\"" +
+        photo.filename +
+        "\" target=\"newtab\" > <img src=\"" + 
+        photo.filename + 
+        "\" width=\"100px\" /> </a>");
     
     markers.addLayer(m);
 
