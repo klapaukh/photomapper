@@ -59,9 +59,9 @@ exec(cmdManual, function(error, stdout, stderr) {
         var filepath = currentValue.SourceFile;
         var tags = currentValue.Tags;
 
-        var latLon = folder.split("/").pop();
-        var lat = currentValue.GPSLatitude;
-        var lon = currentValue.GPSLongitude;
+        var latLon = folder.split("/").pop().split("_");
+        var lat = latLon[0];
+        var lon = latLon[1];
 
         //Remove public at the start of the string
         filepath = filepath.substring(6); 

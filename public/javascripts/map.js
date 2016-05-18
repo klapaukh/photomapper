@@ -23,11 +23,20 @@ var myIcon = new MyIcon();
 
 // All of the data comes from the servers photos endpoint
 $.get("/photos",function(result) { 
-  console.log(result);
-
-  var markers = L.markerClusterGroup();
+  var markers = L.markerClusterGroup(/**{
+    showCoverageOnHover: true,
+    zoomToBoundsOnClick: true,
+    spiderfyOnMaxZoom: true,
+    removeOutsideVisibleBounds: true   
+  }*/);
 
   result.forEach(function(photo){
-    L.marker([photo.lat,photo.lon],{icon: myIcon}).addTo(mymap);
+    var m = L.marker([photo.lat,photo.lon],{icon: myIcon});
+    
+    m.bindPopup("<img src=\"" + photo.filename + "\" width=\"100px\" />");
+    
+    markers.addLayer(m);
+
   });
+  mymap.addLayer(markers);
 })
