@@ -30,21 +30,46 @@ $.get("/photos",function(result) {
     removeOutsideVisibleBounds: true   
   }*/);
 
+  var allTags = [];
+
   result.forEach(function(photo){
-    if(photo.lat === '' || photo.lon === ''){
+    if(photo.lat === '' || photo.lon === '' || 
+       photo.lat === undefined || photo.lon === undefined ){
       console.log("Missing lat/lon data in image " + photo.filename);
       return;
     }
+
     var m = L.marker([photo.lat,photo.lon],{icon: myIcon});
-    
+
+    var tagString = "Tags: ";
+    if(photo.tags){
+       photo.tags.forEach(function (tag){
+         tagString= tagString.concat(" ", tag);
+         allTags.push(tag);
+       });
+    }
+
+
     m.bindPopup("<a href=\"" +
         photo.filename +
         "\" target=\"newtab\" > <img src=\"" + 
         photo.filename + 
-        "\" width=\"100px\" /> </a>");
+        "\" width=\"100px\" /> </a><br />" +
+        tagString + 
+        " <form action=\"/addTag\" >" + 
+        "<input type=\"hidden\" value=\"" +
+        photo.filename + 
+        "\" + name=\"photo\" />" + 
+        "<input type=\"text\" size=\"6\" name=\"tag\" />" + 
+        "<input type=\"submit\" value=\"Add\" />" +
+        "</form>");
     
     markers.addLayer(m);
 
   });
+
+  allTags = $.unique(allTags); 
+
   mymap.addLayer(markers);
+
 })
