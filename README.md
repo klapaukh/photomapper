@@ -17,12 +17,12 @@ There are two directories where photos should be stored:
 #### Progress
 Implemented:
    * Map is displayed
-
-To do:
    * Show markers for photos with manually added locations
    * Show markers for photos with embedded geotags
    * Show photo in popup
    * Make popup photo expand to a full size version
+
+To do:
    * Make tags appear in popup
    * Make tags searchable
    * Allow tags to be added
