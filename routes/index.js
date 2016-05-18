@@ -7,14 +7,14 @@ var router = express.Router();
 var photoData = [];
 
 var exec = require('child_process').exec;
-var cmdGeotagged = 'exiftool -csv -n -r. public/images/geotagged/';
-var cmdManual    = 'exiftool -csv -n -r. public/images/manuallyPlaced/';
+var cmdGeotagged = 'exiftool -csv -n -r. -Directory -FilePath -GPSLatitude -GPSLongitude -Tags public/images/geotagged/';
+var cmdManual    = 'exiftool -csv -n -r. -Directory -FilePath -GPSLatitude -GPSLongitude -Tags public/images/manuallyPlaced/';
 
 var geoTagProcess = exec(cmdGeotagged);
 var manualProcess = exec(cmdManual);
 
-var converterTag = new Converter({constructResult:false});
-var converterMan = new Converter({constructResult:false});
+var converterTag = new Converter({constructResult:false, checkColumn: true});
+var converterMan = new Converter({constructResult:false, checkColumn: true});
 
 //record_parsed will be emitted per row
 converterTag.on("record_parsed", function (row) {
@@ -37,12 +37,11 @@ converterTag.on("record_parsed", function (row) {
   photoData = photoData.concat(result);
 });
 
-
-converterMan.on("record_parsed", function (row) {
-  var folder = row.Directory;
-  var file = row.FilePath;
-  var filepath = row.SourceFile;
-  var tags = row.Tags;
+converterMan.on("record_parsed", function (resultRow, rawRow, rowIndex) {
+  var folder   = resultRow.Directory;
+  var file     = resultRow.FilePath;
+  var filepath = resultRow.SourceFile;
+  var tags     = resultRow.Tags;
 
   var latLon = folder.split("/").pop().split("_");
   var lat = latLon[0];
@@ -59,6 +58,13 @@ converterMan.on("record_parsed", function (row) {
   photoData = photoData.concat(result);
 });
 
+converterMan.on("end_parsed",function(){
+  console.log("Finished parsing manually placed objects");
+})
+
+converterTag.on("end_parsed",function(){
+  console.log("Finished parsing geoTagged objects");
+})
 
 geoTagProcess.stdout.pipe(converterTag);
 manualProcess.stdout.pipe(converterMan);
