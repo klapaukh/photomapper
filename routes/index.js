@@ -86,6 +86,11 @@ router.get('/addtag', function(req, res, next){
 
   console.log(filename + " " + newtags);
 
+  var cmdAddTags = 'exiftool -config .ExifTool_config -overwrite_original -Tags+="' + 
+    newtags + '" ' + filename;
+
+  var tagProcess = exec(cmdAddTags);
+
   res.send("true");
 });
 
