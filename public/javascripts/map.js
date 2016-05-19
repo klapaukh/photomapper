@@ -23,7 +23,24 @@ function addTag(elem){
  var form = elem.parentElement;
  var photoName = form.querySelector('[name="photo"]').value;
  var tag = form.querySelector('[name="tag"]').value;
- console.log(photoName + " " + tag);
+
+ console.log(tag); 
+
+ if(tag === undefined || !(/\S/.test(tag))){
+   console.log("Tag must not be empty");
+   return;
+ }
+ 
+ $.get("/addTag?photo="+
+       encodeURIComponent(photoName) +
+       "&tag=" +
+       encodeURIComponent(tag), function(result){
+   if(result === "true"){
+     console.log("Photo tags updated");
+   } else {
+     console.log("Photo tag update failed");
+   }
+ });
 }
 
 var myIcon = new MyIcon();
@@ -46,16 +63,18 @@ $.get("/photos",function(result) {
       return;
     }
 
-    var m = L.marker([photo.lat,photo.lon],{icon: myIcon});
 
     var tagString = "Tags: ";
+    var tags = ['None'];
     if(photo.tags){
-       photo.tags.forEach(function (tag){
-         tagString= tagString.concat(" ", tag);
-         allTags.push(tag);
+       tags = photo.tags.split(/,\s*/);
+       allTags = allTags.concat(tags);
+       tags.forEach(function (tag, index){
+         tagString= tagString.concat((index == 0 ? " ":", "), tag);
        });
     }
 
+    var m = L.marker([photo.lat,photo.lon],{icon: myIcon, tags: tags});
 
     m.bindPopup("<a href=\"" +
         photo.filename +
@@ -80,6 +99,10 @@ $.get("/photos",function(result) {
 
   mymap.addLayer(markers);
 
-})
+  L.control.tagFilterButton({
+    data: allTags
+  }).addTo(mymap);
 
+
+})
 

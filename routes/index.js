@@ -9,8 +9,8 @@ var router = express.Router();
 var photoData = [];
 
 var exec = require('child_process').exec;
-var cmdGeotagged = 'exiftool -csv -n -r. -Directory -FilePath -GPSLatitude -GPSLongitude -Tags public/images/geotagged/';
-var cmdManual    = 'exiftool -csv -n -r. -Directory -FilePath -GPSLatitude -GPSLongitude -Tags public/images/manuallyPlaced/';
+var cmdGeotagged = 'exiftool -csv -n -r. -Directory -FilePath -GPSLatitude -GPSLongitude -TagsList public/images/geotagged/';
+var cmdManual    = 'exiftool -csv -n -r. -Directory -FilePath -GPSLatitude -GPSLongitude -TagsList public/images/manuallyPlaced/';
 
 var geoTagProcess = exec(cmdGeotagged);
 var manualProcess = exec(cmdManual);
@@ -26,7 +26,7 @@ converterTag.on("record_parsed", function (row) {
   var filepath = row.SourceFile;
   var lat      = row.GPSLatitude;
   var lon      = row.GPSLongitude;
-  var tags     = row.Tags;
+  var tags     = row.TagsList;
 
   //Remove public at the start of the string
   filepath = filepath.substring(6); 
@@ -43,7 +43,7 @@ converterMan.on("record_parsed", function (resultRow, rawRow, rowIndex) {
   var folder   = resultRow.Directory;
   var file     = resultRow.FilePath;
   var filepath = resultRow.SourceFile;
-  var tags     = resultRow.Tags;
+  var tags     = resultRow.TagsList;
 
   var latLon = folder.split("/").pop().split("_");
   var lat = latLon[0];
@@ -86,10 +86,16 @@ router.get('/addtag', function(req, res, next){
 
   console.log(filename + " " + newtags);
 
-  var cmdAddTags = 'exiftool -config .ExifTool_config -overwrite_original -Tags+="' + 
+  var cmdAddTags = 'exiftool -config .ExifTool_config -overwrite_original -TagsList+="' + 
     newtags + '" ' + filename;
 
-  var tagProcess = exec(cmdAddTags);
+  console.log(cmdAddTags);
+
+  var tagProcess = exec(cmdAddTags, function(error, stdout, stderr){
+    console.log("stdout: " + stdout);
+    console.log("stderr: " + stderr);
+  });
+
 
   res.send("true");
 });
