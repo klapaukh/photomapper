@@ -1,3 +1,5 @@
+"use strict";
+
 var express = require('express');
 var Converter = require('csvtojson').Converter;
 var router = express.Router();
@@ -28,7 +30,7 @@ converterTag.on("record_parsed", function (row) {
 
   //Remove public at the start of the string
   filepath = filepath.substring(6); 
-  result = {
+  var result = {
     filename: filepath,
     lat: lat,
     lon: lon,
@@ -49,7 +51,7 @@ converterMan.on("record_parsed", function (resultRow, rawRow, rowIndex) {
 
   //Remove public at the start of the string
   filepath = filepath.substring(6); 
-  result = {
+  var result = {
     filename: filepath,
     lat: lat,
     lon: lon,
@@ -76,6 +78,15 @@ router.get('/', function(req, res, next) {
 
 router.get('/photos', function(req,res,next) {
   res.send(photoData);
+});
+
+router.get('/addtag', function(req, res, next){
+  var filename = req.query.photo;
+  var newtags = req.query.tag;
+
+  console.log(filename + " " + newtags);
+
+  res.send("true");
 });
 
 module.exports = router;

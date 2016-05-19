@@ -19,6 +19,13 @@ var MyIcon = L.Icon.Default.extend({
  }
 });
 
+function addTag(elem){
+ var form = elem.parentElement;
+ var photoName = form.querySelector('[name="photo"]').value;
+ var tag = form.querySelector('[name="tag"]').value;
+ console.log(photoName + " " + tag);
+}
+
 var myIcon = new MyIcon();
 
 // All of the data comes from the servers photos endpoint
@@ -56,13 +63,14 @@ $.get("/photos",function(result) {
         photo.filename + 
         "\" width=\"100px\" /> </a><br />" +
         tagString + 
-        " <form action=\"/addTag\" >" + 
+        " <form id=\"tagForm\">" + 
         "<input type=\"hidden\" value=\"" +
         photo.filename + 
         "\" + name=\"photo\" />" + 
         "<input type=\"text\" size=\"6\" name=\"tag\" />" + 
-        "<input type=\"submit\" value=\"Add\" />" +
-        "</form>");
+        "<button type=\"button\" onclick=\"addTag(this)\">Add</button>" +
+        "</form>" 
+        );
     
     markers.addLayer(m);
 
@@ -73,3 +81,5 @@ $.get("/photos",function(result) {
   mymap.addLayer(markers);
 
 })
+
+
