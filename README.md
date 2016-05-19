@@ -20,12 +20,16 @@ Implemented:
    * Show markers for photos with manually added locations
    * Show markers for photos with embedded geotags
    * Show photo in popup
-   * Make popup photo expand to a full size version
+   * Make popup photo expand to a full size version (opens in a new tab)
 
-To do:
+Partial:
    * Make tags appear in popup
    * Make tags searchable
-   * Allow tags to be added
-   * Dockerised
+   * Allow tags to be added 
+   * Basic Docker script
+
+To do:
+   * Tag deletion
+   * Tags being updated in the markers as well as the files
 
 
