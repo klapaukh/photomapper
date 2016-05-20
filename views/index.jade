@@ -1,21 +1,35 @@
 extends layout
 
 append styles
+  link(rel="stylesheet",href="/stylesheets/style.css")
   link(rel="stylesheet",href="/stylesheets/leaflet.css")
   link(rel="stylesheet",href="/stylesheets/MarkerCluster.Default.css")
   link(rel="stylesheet",href="/stylesheets/MarkerCluster.css")
   link(rel="stylesheet",href="/stylesheets/easy-button.css")
   link(rel="stylesheet",href="/stylesheets/leaflet-tag-filter-button.css")
-  style.
-    #mapid {
-      width: 100%;
-      height: 700px;
-    }
+  link(rel="stylesheet",href="/stylesheets/navbar-fixed-side.css")
+
 
 block body
-  .container
-    h1 Photo mapping
-    #mapid
+  .container-fluid
+    .row
+      .col-sm-3.col-lg-2
+        nav.navbar.navbar-default.navbar-fixed-side
+          .container-fluid
+            .navbar-header
+              button.navbar-toggle.collapsed(type="button",data-toggle="collapse",data-target="#filters" aria-expanded="false")
+                span.sr-only Toggle navigation
+                span.icon-bar
+                span.icon-bar
+                span.icon-bar
+              a.navbar-brand(href="/") Filters
+            .collapse.navbar-collapse(id="filters")
+              ul.nav.navbar-nav#tag-list
+                li 
+                  button.btn Clear All
+      .col-sm-9.col-lg-10    
+        h1 Photo mapping
+        #mapid
 
 append scripts
   script(src="/javascripts/leaflet.js")

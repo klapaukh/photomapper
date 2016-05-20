@@ -81,12 +81,12 @@ router.get('/photos', function(req,res,next) {
 });
 
 router.get('/addtag', function(req, res, next){
-  var filename = req.query.photo;
+  var filename = "public" + req.query.photo;
   var newtags = req.query.tag;
 
   console.log(filename + " " + newtags);
 
-  var cmdAddTags = 'exiftool -config .ExifTool_config -overwrite_original -TagsList+="' + 
+  var cmdAddTags = 'exiftool -overwrite_original -TagsList+="' + 
     newtags + '" ' + filename;
 
   console.log(cmdAddTags);
@@ -94,10 +94,11 @@ router.get('/addtag', function(req, res, next){
   var tagProcess = exec(cmdAddTags, function(error, stdout, stderr){
     console.log("stdout: " + stdout);
     console.log("stderr: " + stderr);
+
+     res.send(stderr?"true":stderr);
   });
 
 
-  res.send("true");
 });
 
 module.exports = router;

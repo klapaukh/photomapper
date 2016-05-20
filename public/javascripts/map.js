@@ -19,6 +19,15 @@ var MyIcon = L.Icon.Default.extend({
  }
 });
 
+
+function delTag(elem){
+  console.log("Delete: " + elem);
+}
+
+function clickTag(elem){
+  console.log("Filter: " + elem);
+}
+
 function addTag(elem){
  var form = elem.parentElement;
  var photoName = form.querySelector('[name="photo"]').value;
@@ -64,13 +73,19 @@ $.get("/photos",function(result) {
     }
 
 
-    var tagString = "Tags: ";
+    var tagString = 'Tags: ';
     var tags = ['None'];
     if(photo.tags){
        tags = photo.tags.split(/,\s*/);
        allTags = allTags.concat(tags);
        tags.forEach(function (tag, index){
-         tagString= tagString.concat((index == 0 ? " ":", "), tag);
+         tagString= tagString.concat((index == 0 ? " ":", "),
+            '<span class="tag-group">',
+            '<span class="tag-name text-info" onclick="clickTag(this)">',
+            tag, 
+            '</span>',
+            '<span class="text-danger glyphicon glyphicon-remove del-icon" onClick="delTag(this)"></span>',
+            '</span>');
        });
     }
 
@@ -82,7 +97,7 @@ $.get("/photos",function(result) {
         photo.filename + 
         "\" width=\"100px\" /> </a><br />" +
         tagString + 
-        " <form id=\"tagForm\">" + 
+        " <form>" + 
         "<input type=\"hidden\" value=\"" +
         photo.filename + 
         "\" + name=\"photo\" />" + 
@@ -103,6 +118,17 @@ $.get("/photos",function(result) {
     data: allTags
   }).addTo(mymap);
 
-
-})
+  var filters = $('ul#tag-list')
+  $.each(allTags, function(i)
+  {
+    var li = $('<li/>')
+        .appendTo(filters);
+    var inputBox = $('<input type="checkbox"/>')
+        .addClass('tag-checkbox')
+        .appendTo(li);
+    var text = $('<span />')
+         .text(allTags[i])
+         .appendTo(li);
+  });
+});
 
