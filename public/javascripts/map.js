@@ -56,14 +56,9 @@ var myIcon = new MyIcon();
 
 // All of the data comes from the servers photos endpoint
 $.get("/photos",function(result) { 
-  var markers = L.markerClusterGroup(/**{
-    showCoverageOnHover: true,
-    zoomToBoundsOnClick: true,
-    spiderfyOnMaxZoom: true,
-    removeOutsideVisibleBounds: true   
-  }*/);
 
   var allTags = [];
+  var pruneCluster = new PruneClusterForLeaflet();
 
   result.forEach(function(photo){
     if(photo.lat === '' || photo.lon === '' || 
@@ -89,9 +84,12 @@ $.get("/photos",function(result) {
        });
     }
 
-    var m = L.marker([photo.lat,photo.lon],{icon: myIcon, tags: tags});
+    var marker = new PruneCluster.Marker(photo.lat, photo.lon);
 
-    m.bindPopup("<a href=\"" +
+    marker.data.icon = myIcon;
+    marker.data.tags = tags;
+    
+    marker.data.popup = "<a href=\"" +
         photo.filename +
         "\" target=\"newtab\" > <img src=\"" + 
         photo.filename + 
@@ -103,20 +101,14 @@ $.get("/photos",function(result) {
         "\" + name=\"photo\" />" + 
         "<input type=\"text\" size=\"6\" name=\"tag\" />" + 
         "<button type=\"button\" onclick=\"addTag(this)\">Add</button>" +
-        "</form>" 
-        );
+        "</form>";
     
-    markers.addLayer(m);
-
+    pruneCluster.RegisterMarker(marker);
   });
 
   allTags = $.unique(allTags); 
 
-  mymap.addLayer(markers);
-
-  L.control.tagFilterButton({
-    data: allTags
-  }).addTo(mymap);
+  mymap.addLayer(pruneCluster);
 
   var filters = $('ul#tag-list')
   $.each(allTags, function(i)
