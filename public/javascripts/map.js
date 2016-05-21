@@ -26,7 +26,7 @@ function delTag(elem){
  //Get the data for what to update       
  var form = $(elem).closest(".tags-list").siblings("form")[0];
  var photoName = form.querySelector('[name="photo"]').value;
- var tag = $(elem).siblings().text();
+ var tag = $(elem).siblings(".tag-name").text();
 
  console.log("Removing tag:" + tag); 
 
@@ -61,6 +61,15 @@ function delTag(elem){
      //Update the leaflet marker popup binding
      pruneCluster._objectsOnMap[im].data._leafletMarker.bindPopup(newPopup,undefined)
      
+     // If this is the first in the list, remove the next comma
+     var nPrev = $(elem).parent().prev('.tag-group').size();
+     var next  = $(elem).parent().next('.tag-group');
+
+     if(nPrev === 0 && next.size() > 0){
+       // remove now leading comma
+       next.children(".space").text(" ");
+     }
+
      //update the actual popup on the screen.
      $(elem).parent().remove(); 
 
@@ -180,13 +189,16 @@ function addTag(elem){
      var tagList = $('.tags-list')
      var tagGroup = $('<span/>')
         .addClass('tag-group')
-        .text((m.data.tags.length === 1 ? " " : ", "))
         .appendTo(tagList);
+     var space = $('<span />')
+        .addClass('space')
+        .text((m.data.tags.length === 1 ? " " : ", "))
+        .appendTo(tagGroup);
      var tagName = $('<span onClick="clickTag($(this).text())"/>')
         .addClass('tag-name')
         .text(tag)
         .appendTo(tagGroup);
-     var text = $('<span />')
+     var text = $('<span onClick="delTag(this)" />')
          .addClass('text-danger')
          .addClass('glyphicon-remove')
          .addClass('glyphicon')
@@ -221,7 +233,9 @@ function toTagString(allTags){
 
   allTags.forEach(function (tag, index){
     tagString = tagString.concat('<span class="tag-group">',
+       '<span class="space">',
        (index == 0 ? " ":", "),
+       '</span>',
        '<span class="tag-name text-info" onclick="clickTag($(this).text())">',
        tag, 
        '</span>',

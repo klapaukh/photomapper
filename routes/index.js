@@ -73,7 +73,7 @@ manualProcess.stdout.pipe(converterMan);
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+  res.render('index', { title: 'Photo Mapper' });
 });
 
 router.get('/photos', function(req,res,next) {
