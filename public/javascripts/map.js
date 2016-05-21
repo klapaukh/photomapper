@@ -153,6 +153,7 @@ function addTag(elem){
  var tag = form.querySelector('[name="tag"]').value;
 
  console.log("Adding tag:" + tag); 
+ form.querySelector('[name="tag"]').value = "";
 
  if(tag === undefined || !(/\S/.test(tag))){
    console.log("Tag must not be empty");
