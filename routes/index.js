@@ -142,8 +142,8 @@ router.get('/deltag', function(req, res, next){
 
     if(p !== undefined){
       if(p.tags !== undefined){
-        var regexp = new RegExp("(^|,)\\s*"+ newtags,"");
-        p.tags = p.tags.replace(regexp,"");
+        var regexp = new RegExp("(^|,)\\s*"+ newtags + "(,|$)","");
+        p.tags = p.tags.replace(regexp,"$2").replace(/^\s*,\s*/,"");
       }
     }
 

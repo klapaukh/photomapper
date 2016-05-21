@@ -24,9 +24,9 @@ L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
  */
 function delTag(elem){
  //Get the data for what to update       
- var form = elem.parentElement;
+ var form = $(elem).closest(".tags-list").siblings("form")[0];
  var photoName = form.querySelector('[name="photo"]').value;
- var tag = form.querySelector('[name="tag"]').value;
+ var tag = $(elem).siblings().text();
 
  console.log("Removing tag:" + tag); 
 
@@ -53,7 +53,7 @@ function delTag(elem){
 
      var m = pruneCluster.GetMarkers()[im];
 
-     m.data.tags = m.data.tags.fitler( function(t) {return t !== tag; });
+     m.data.tags = m.data.tags.filter( function(t) {return t !== tag; });
      var newPopup =  toMarkerPopupString(m);
 
      m.data.popup = newPopup;
@@ -62,8 +62,7 @@ function delTag(elem){
      pruneCluster._objectsOnMap[im].data._leafletMarker.bindPopup(newPopup,undefined)
      
      //update the actual popup on the screen.
-     var tagList = $(".tag-name:contains('"+ tag + "')").parent().remove();
-
+     $(elem).parent().remove(); 
 
      pruneCluster.ProcessView();
    } else {
