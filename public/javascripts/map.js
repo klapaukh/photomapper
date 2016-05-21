@@ -3,12 +3,11 @@
 // We are using a leaflet map centered on Wellington
 var mymap = L.map('mapid').setView([-41.296, 174.777], 5);
 
-// Global variable to store all the markers. This way we can easily search
-// through and modify them. 
-var markers = [];
-
 // Global store of all used tags
 var allTags = [];
+
+// Is this if the first filter people applied
+var filters = [];
 
 // Global link to the pruneCluster to tell it to update
 var pruneCluster = new PruneClusterForLeaflet();
@@ -24,15 +23,115 @@ L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
  * send a request to delete the data from the photo. Confirm with a popup.
  */
 function delTag(elem){
-  console.log("Delete: " + elem);
+ //Get the data for what to update       
+ var form = elem.parentElement;
+ var photoName = form.querySelector('[name="photo"]').value;
+ var tag = form.querySelector('[name="tag"]').value;
+
+ console.log("Removing tag:" + tag); 
+
+ if(tag === undefined || !(/\S/.test(tag))){
+   console.log("Tag must not be empty");
+   return;
+ }
+
+ //Send a request to update the photo EXIF data 
+ $.get("/delTag?photo="+
+       encodeURIComponent(photoName) +
+       "&tag=" +
+       encodeURIComponent(tag), function(result){
+   if(result === "true"){
+     console.log("Photo tags updated");
+
+     //Update the markers popup box in the persistent store
+     var im = pruneCluster.
+       GetMarkers().
+       findIndex(function(m) { return m.data.photo === photoName; });
+     if(im === undefined){
+       console.error("Couldn't find the photo popup to update");
+     }
+
+     var m = pruneCluster.GetMarkers()[im];
+
+     m.data.tags = m.data.tags.fitler( function(t) {return t !== tag; });
+     var newPopup =  toMarkerPopupString(m);
+
+     m.data.popup = newPopup;
+
+     //Update the leaflet marker popup binding
+     pruneCluster._objectsOnMap[im].data._leafletMarker.bindPopup(newPopup,undefined)
+     
+     //update the actual popup on the screen.
+     var tagList = $(".tag-name:contains('"+ tag + "')").parent().remove();
+
+
+     pruneCluster.ProcessView();
+   } else {
+     console.error(result);
+     console.error("Photo tag update failed");
+   }
+ });
+
 }
 
 /*
- * Check the checkbox for the clicked filter
+ * Check the checkbox for the clicked filter and apply the filter
  */
-function clickTag(elem){
-  console.log("Filter: " + elem);
+function clickTag(tag){
+  var tagList = $('#tag-list li');
+  tagList.each(function(i){
+    var elem = tagList[i];
+    var span = $(elem).find('span');
+    var t = $(span).text();
+    if(t === tag){
+      var input = $(elem).find('input');
+      if(!input.prop('checked')){
+        input.prop('checked',true);
+        filters.push(tag);
+      }
+
+    }
+  });
+
+  filterTag(tag);
 }
+
+function filterTag(tag){
+  pruneCluster.
+    GetMarkers().
+    forEach(function(m){
+      var matches = m.data.tags.find(function(t) { return t === tag; });
+      if(matches !== undefined){
+        m.filtered = false;
+      } else if(filters.length === 1) {
+        //If it's the first filter than everything else needs to hide
+        m.filtered = true;
+      }
+    });
+
+  pruneCluster.ProcessView();
+}
+
+function unFilterTag(tag){
+  pruneCluster.
+    GetMarkers().
+    forEach(function(m){
+      if(m.filtered === false){
+        var matches = m.data.tags.
+          find(function(t) { 
+            return filters.find(function(f){
+              return t === f;
+            }) !== undefined 
+          });
+        if(matches === undefined){
+          m.filtered = true;
+        } 
+      }
+    });
+
+  pruneCluster.ProcessView();
+}
+
 
 /*
  * Add a tag to a photo. This both updates the photo's popup and 
@@ -82,10 +181,11 @@ function addTag(elem){
      var tagList = $('.tags-list')
      var tagGroup = $('<span/>')
         .addClass('tag-group')
+        .text((m.data.tags.length === 1 ? " " : ", "))
         .appendTo(tagList);
-     var tagName = $('<span onClick="clickTag(this)"/>')
+     var tagName = $('<span onClick="clickTag($(this).text())"/>')
         .addClass('tag-name')
-        .text((m.data.tags.length === 1 ? " " : ", ") + tag)
+        .text(tag)
         .appendTo(tagGroup);
      var text = $('<span />')
          .addClass('text-danger')
@@ -121,9 +221,9 @@ function toTagString(allTags){
   } 
 
   allTags.forEach(function (tag, index){
-    tagString= tagString.concat((index == 0 ? " ":", "),
-       '<span class="tag-group">',
-       '<span class="tag-name text-info" onclick="clickTag(this)">',
+    tagString = tagString.concat('<span class="tag-group">',
+       (index == 0 ? " ":", "),
+       '<span class="tag-name text-info" onclick="clickTag($(this).text())">',
        tag, 
        '</span>',
        '<span class="text-danger glyphicon glyphicon-remove del-icon" onClick="delTag(this)"></span>',
@@ -152,7 +252,7 @@ function toMarkerPopupString(marker){
         "<input type=\"hidden\" value=\"" +
         marker.data.photo + 
         "\" + name=\"photo\" />" + 
-        "<input type=\"text\" size=\"6\" name=\"tag\" />" + 
+        '<input type="text" size="6" name="tag" onkeydown = "if (event.keyCode == 13) { addTag(this); return false; } " />' + 
         "<button type=\"button\" onclick=\"addTag(this)\">Add</button>" +
         "</form>";
 }
@@ -168,12 +268,50 @@ function addFilterBoxes(tags){
         .appendTo(filtersList);
     var inputBox = $('<input type="checkbox"/>')
         .addClass('tag-checkbox')
+        .click(function() {
+          var checked = $(this).prop('checked');
+          var li = $(this).parent();
+          var span = $(li).find('span');
+          var t = $(span).text();
+          if(checked){
+            filters.push(t);
+            filterTag(t);
+          } else {
+            filters = filters
+              .filter(function(x) { return x !== t; });
+            if(filters.length === 0){
+              resetFilters();
+            } else { 
+              unFilterTag(t);
+            }
+          }
+        })
         .appendTo(li);
     var text = $('<span />')
          .text(t)
          .appendTo(li);
   });
 }
+
+/*
+ * Reset all the filters.
+ * Makes all the markers visible, and makes all the 
+ * checkboxes unchecked. 
+ */
+function resetFilters(){
+  pruneCluster.GetMarkers().forEach(function(m){
+    m.filtered = false;
+  });
+  pruneCluster.ProcessView();
+
+  var boxes = $('.tag-checkbox');
+  boxes.each(function(i){
+    boxes[i].checked = false;
+  });
+  
+  filters = [];
+}
+
 
 // All of the data comes from the servers photos endpoint
 $.get("/photos",function(result) { 
@@ -209,7 +347,6 @@ $.get("/photos",function(result) {
   
     pruneCluster.RegisterMarker(marker);
 
-    markers.push(marker);
   });
 
   allTags = $.unique(allTags).sort(); 
