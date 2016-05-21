@@ -15,21 +15,19 @@ There are two directories where photos should be stored:
      photos at that location. 
 
 #### Progress
+
 Implemented:
    * Map is displayed
    * Show markers for photos with manually added locations
    * Show markers for photos with embedded geotags
    * Show photo in popup
    * Make popup photo expand to a full size version (opens in a new tab)
-
-Partial:
    * Make tags appear in popup
    * Make tags searchable
    * Allow tags to be added 
-   * Basic Docker script
-
-To do:
    * Tag deletion
    * Tags being updated in the markers as well as the files
 
+To do:
+   * Run as a Docker container
 
