@@ -95,7 +95,18 @@ router.get('/addtag', function(req, res, next){
     console.log("stdout: " + stdout);
     console.log("stderr: " + stderr);
 
-     res.send(stderr?"true":stderr);
+    var p =photoData
+      .find(function(p) { return p.filename === req.query.photo ;});
+
+    if(p !== undefined){
+      if(p.tags === undefined){
+        p.tags = [newtags];
+      }else{
+        p.tags = p.tags + ", " + newtags;
+      }
+    }
+
+    res.send(stderr == '' ?"true":stderr);
   });
 
 
