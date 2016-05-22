@@ -155,13 +155,17 @@ router.get('/deltag', function(req, res, next){
     }
 
     //update the cached store
-    var p =photoData
+    var p = photoData
       .find(function(p) { return p.filename === req.query.photo ;});
 
     if(p !== undefined){
       if(p.tags !== undefined){
-        var regexp = new RegExp("(^|,)\\s*"+ newtags + "(,|$)","");
-        p.tags = p.tags.replace(regexp,"$2").replace(/^\s*,\s*/,"");
+        if(typeof(p.tags === "string")){
+          var regexp = new RegExp("(^|,)\\s*"+ newtags + "(,|$)","");
+          p.tags = p.tags.replace(regexp,"$2").replace(/^\s*,\s*/,"");
+        } else {
+          p.tags = p.tags.filter(function(m) { return m !== newtags; });
+        }
       }
     }
 

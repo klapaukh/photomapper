@@ -62,14 +62,13 @@ function delTag(elem){
      console.log("Photo tags updated");
 
      //Update the markers popup box in the persistent store
-     var im = pruneCluster.
+     var m = pruneCluster.
        GetMarkers().
-       findIndex(function(m) { return m.data.photo === photoName; });
-     if(im === undefined){
+       find(function(m) { return m.data.photo === photoName; });
+
+     if(m === undefined){
        console.error("Couldn't find the photo popup to update");
      }
-
-     var m = pruneCluster.GetMarkers()[im];
 
      m.data.tags = m.data.tags.filter( function(t) {return t !== tag; });
      var newPopup =  toMarkerPopupString(m);
@@ -77,7 +76,11 @@ function delTag(elem){
      m.data.popup = newPopup;
 
      //Update the leaflet marker popup binding
-     pruneCluster._objectsOnMap[im].data._leafletMarker.bindPopup(newPopup,undefined)
+     var leafm = pruneCluster
+         ._objectsOnMap
+         .find(function(m) { return m.lastMarker.data.photo === photoName; });
+       
+     leafm.data._leafletMarker.bindPopup(newPopup,undefined);
      
      // If this is the first in the list, remove the next comma
      var nPrev = $(elem).parent().prev('.tag-group').size();
@@ -187,14 +190,12 @@ function addTag(elem){
      console.log("Photo tags updated");
 
      //Update the markers popup box in the persistent store
-     var im = pruneCluster.
+     var m = pruneCluster.
        GetMarkers().
-       findIndex(function(m) { return m.data.photo === photoName; });
-     if(im === undefined){
+       find(function(m) { return m.data.photo === photoName; });
+     if(m === undefined){
        console.error("Couldn't find the photo popup to update");
      }
-
-     var m = pruneCluster.GetMarkers()[im];
 
      m.data.tags.push(tag);
      var newPopup =  toMarkerPopupString(m);
@@ -202,7 +203,11 @@ function addTag(elem){
      m.data.popup = newPopup;
 
      //Update the leaflet marker popup binding
-     pruneCluster._objectsOnMap[im].data._leafletMarker.bindPopup(newPopup,undefined)
+     var leafm = pruneCluster
+         ._objectsOnMap
+         .find(function(m) { return m.lastMarker.data.photo === photoName; });
+       
+     leafm.data._leafletMarker.bindPopup(newPopup,undefined);
      
      //update the actual popup on the screen.
      var tagList = $('.tags-list')
@@ -215,6 +220,7 @@ function addTag(elem){
         .appendTo(tagGroup);
      var tagName = $('<span onClick="clickTag($(this).text())"/>')
         .addClass('tag-name')
+        .addClass('text-info')
         .text(tag)
         .appendTo(tagGroup);
      var text = $('<span onClick="delTag(this)" />')
@@ -224,7 +230,7 @@ function addTag(elem){
          .addClass('del-icon')
          .appendTo(tagGroup);
 
-     if(allTags.findIndex(function(t){ return  t === tag; }) !== undefined) {
+     if(allTags.find(function(t){ return  t === tag; }) === undefined) {
        allTags.push(tag);
        addFilterBoxes([tag]);
      }
@@ -361,8 +367,10 @@ $.get("/photos",function(result) {
 
     //Get the tags
     var tags = photo.tags;
-    if(tags){
-       tags = photo.tags.split(/,\s*/);
+    if(typeof(tags) === "object"){
+      //When there is exactly one it thinks it's a list for some reason
+    } else if(tags){
+       tags = tags.split(/,\s*/);
     } else {
       tags = [];
     }
@@ -381,7 +389,12 @@ $.get("/photos",function(result) {
 
   });
 
-  allTags = $.unique(allTags).sort(); 
+  //Remove duplicates and sort
+  allTags = allTags.filter(function onlyUnique(value, index, self) { 
+       return self.indexOf(value) === index;
+    }).sort(function (a, b) {
+        return a.toLowerCase().localeCompare(b.toLowerCase()); 
+    });
 
   mymap.addLayer(pruneCluster);
 
