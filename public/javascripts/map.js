@@ -79,8 +79,10 @@ function delTag(elem){
      var leafm = pruneCluster
          ._objectsOnMap
          .find(function(m) { return m.lastMarker.data.photo === photoName; });
-       
-     leafm.data._leafletMarker.bindPopup(newPopup,undefined);
+
+     if(leafm !== undefined){  
+       leafm.data._leafletMarker.bindPopup(newPopup,undefined);
+     }
      
      // If this is the first in the list, remove the next comma
      var nPrev = $(elem).parent().prev('.tag-group').size();
@@ -207,7 +209,9 @@ function addTag(elem){
          ._objectsOnMap
          .find(function(m) { return m.lastMarker.data.photo === photoName; });
        
-     leafm.data._leafletMarker.bindPopup(newPopup,undefined);
+     if(leafm !== undefined){
+       leafm.data._leafletMarker.bindPopup(newPopup,undefined);
+     }
      
      //update the actual popup on the screen.
      var tagList = $('.tags-list')
@@ -302,6 +306,9 @@ function toMarkerPopupString(marker){
 function addFilterBoxes(tags){
   var filtersList = $('ul#tag-list');
   tags.forEach(function(t) {
+    if(t === undefined || t === '') {
+       return;
+    }
     var li = $('<li/>')
         .appendTo(filtersList);
     var inputBox = $('<input type="checkbox"/>')

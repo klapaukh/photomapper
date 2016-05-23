@@ -118,12 +118,12 @@ router.get('/addtag', function(req, res, next){
     }
 
     //update the cached store
-    var p =photoData
+    var p = photoData
       .find(function(p) { return p.filename === req.query.photo ;});
 
     if(p !== undefined){
-      if(p.tags === undefined){
-        p.tags = [newtags];
+      if(p.tags === undefined || !(/\S/.test(p.tags))){
+        p.tags = newtags;
       }else{
         p.tags = p.tags + ", " + newtags;
       }

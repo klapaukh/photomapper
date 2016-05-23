@@ -4,6 +4,10 @@ This tool will place photos provided to it onto a map so they can be easily
 explored. Photos should be searchable by tags, taggable. Photos should have
 popups that come up with the relevant tags and photos. 
 
+Currently tags can be any text that doesn't contain commas, as those are used 
+as a separator.
+
+
 #### Photo Storage
 
 The application should support both geotagged and manually located photos.
