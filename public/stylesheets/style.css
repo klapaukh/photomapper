@@ -18,7 +18,7 @@
 
 #mapid {
   width: 100%;
-  height: 700px;
+  height: 500px;
 }
 
 .del-icon {
@@ -43,4 +43,9 @@
 
 input.tag-checkbox {
   margin-right: 1ex;
+}
+
+input.filter-type {
+  margin-right: 1ex;
+  margin-left: 1ex;
 }

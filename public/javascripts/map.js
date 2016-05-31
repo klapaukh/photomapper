@@ -24,7 +24,7 @@ var mymap = L.map('mapid').setView([-41.296, 174.777], 5);
 // Global store of all used tags
 var allTags = [];
 
-// Is this if the first filter people applied
+// Currently active filters
 var filters = [];
 
 // Global link to the pruneCluster to tell it to update
@@ -124,45 +124,56 @@ function clickTag(tag){
     }
   });
 
-  filterTag(tag);
+  genericFilterTags();
 }
 
-function filterTag(tag){
+function genericFilterTags(){
+  var filterType = $('input[name="filter-type"]:checked').val();
+
   pruneCluster.
     GetMarkers().
     forEach(function(m){
-      var matches = m.data.tags.find(function(t) { return t === tag; });
-      if(matches !== undefined){
-        m.filtered = false;
-      } else if(filters.length === 1) {
-        //If it's the first filter than everything else needs to hide
-        m.filtered = true;
-      }
-    });
 
-  pruneCluster.ProcessView();
-}
-
-function unFilterTag(tag){
-  pruneCluster.
-    GetMarkers().
-    forEach(function(m){
-      if(m.filtered === false){
-        var matches = m.data.tags.
-          find(function(t) { 
-            return filters.find(function(f){
+      if(filterType === "Not"){
+          // You are filtered if you have any of the filters active
+          var matches = filters
+          .find(function(t) { 
+            return m.data.tags.find(function(f){
               return t === f;
             }) !== undefined 
           });
-        if(matches === undefined){
-          m.filtered = true;
-        } 
+          m.filtered = matches !== undefined;
+      }else if(filterType === "And"){
+        //You are not filtered if you have all the filters active
+        if(filters.length === 0) {
+          m.filtered = false;
+        } else {
+          m.filtered = !filters
+          .every(function(t) { 
+            return m.data.tags.find(function(f){
+              return t === f;
+            }) !== undefined 
+          });
+        }
+      }else if(filterType === "Or"){
+          // You are not filtered if you have any of the filters active
+          var matches = m
+            .data
+            .tags
+            .find(function(t) { 
+               return filters.find(function(f){
+                 return t === f;
+               }) !== undefined 
+          });
+          m.filtered = matches === undefined;
+      } else {
+        console.error("Unknown filter type selected: " + filterType)
       }
+
     });
 
   pruneCluster.ProcessView();
 }
-
 
 /*
  * Add a tag to a photo. This both updates the photo's popup and 
@@ -320,14 +331,14 @@ function addFilterBoxes(tags){
           var t = $(span).text();
           if(checked){
             filters.push(t);
-            filterTag(t);
+            genericFilterTags();
           } else {
             filters = filters
               .filter(function(x) { return x !== t; });
             if(filters.length === 0){
               resetFilters();
             } else { 
-              unFilterTag(t);
+              genericFilterTags();
             }
           }
         })

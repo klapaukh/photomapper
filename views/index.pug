@@ -38,6 +38,15 @@ block body
                 span.icon-bar
               a.navbar-brand(href="/") Filters
             .collapse.navbar-collapse(id="filters")
+              .container-fluid
+                div Filter type
+                form(action="", id="filter-type-form")
+                  input.filter-type(type="radio", name="filter-type", value="Or", onclick="genericFilterTags()", checked=true)
+                  | Or                  
+                  input.filter-type(type="radio", name="filter-type", value="And", onclick="genericFilterTags()")
+                  | And
+                  input.filter-type(type="radio", name="filter-type", value="Not", onclick="genericFilterTags()")
+                  | Not
               ul.nav.navbar-nav#tag-list
                 li 
                   button.btn(onclick="resetFilters()") Clear All
