@@ -35,3 +35,7 @@ npm-debug.log
 .#*
 ~$*
 *~
+
+# photos
+public/images/geotagged/*
+public/images/manuallyTagged/*
