@@ -49,3 +49,7 @@ input.filter-type {
   margin-right: 1ex;
   margin-left: 1ex;
 }
+
+datalist {
+  display: none; /**Don't trust old browsers to not show it */
+}

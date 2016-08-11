@@ -305,7 +305,7 @@ function toMarkerPopupString(marker){
         "<input type=\"hidden\" value=\"" +
         marker.data.photo + 
         "\" + name=\"photo\" />" + 
-        '<input type="text" size="6" name="tag" onkeydown = "if (event.keyCode == 13) { addTag(this); return false; } " />' + 
+        '<input list="tagsDataList" type="text" size="6" name="tag" onkeydown = "if (event.keyCode == 13) { addTag(this); return false; } " />' + 
         "<button type=\"button\" onclick=\"addTag(this)\">Add</button>" +
         "</form>";
 }
@@ -313,6 +313,7 @@ function toMarkerPopupString(marker){
 
 /*
  * Add checkboxes for each of the tags
+ * Also add them to the #tagsDataList
  */
 function addFilterBoxes(tags){
   var filtersList = $('ul#tag-list');
@@ -346,6 +347,12 @@ function addFilterBoxes(tags){
     var text = $('<span />')
          .text(t)
          .appendTo(li);
+
+    //Add to autocomplete data list
+    var dataListOption = $("<option value='"+ t +"'>");
+    var dataList= $('datalist#tagsDataList');
+    dataListOption.appendTo(dataList);
+
   });
 }
 
